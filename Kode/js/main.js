@@ -1,6 +1,5 @@
-
 import MouseLookController from './MouseLookController.js';
-import { Renderer, Scene, Node, Mesh, Primitive, BasicMaterial, CubeMapMaterial, PerspectiveCamera, vec3 } from '../lib/engine/index.js';
+import {Renderer, Scene, Node, Mesh, Primitive, PerspectiveCamera, vec4, vec3} from '../lib/engine/index.js';
 import PhongMaterial from './PhongMaterial.js';
 
 // Create a Renderer and append the canvas element to the DOM.
@@ -13,61 +12,109 @@ let time = 0.001;
 const scene = new Scene();
 
 // We load some textures and instantiate materials from them:
-const sunMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/sun.jpg')
+const sunTexture = renderer.loadTexture('resources/sun.jpg');
+const earthTexture = renderer.loadTexture('resources/earth_daymap.jpg');
+const moonTexture = renderer.loadTexture('resources/moon.jpg');
+const mercuryTexture = renderer.loadTexture('resources/mercury_daymap.jpg');
+const marsTexture = renderer.loadTexture('resources/mars.jpg');
+const jupiterTexture = renderer.loadTexture('resources/jupiter.jpg');
+
+const lightNode = new Node();
+lightNode.setTranslation(0, 0, 0); // Plassér lyset ved solens posisjon
+scene.add(lightNode);
+
+const light = {
+    ambient: vec4.fromValues(0.2, 0.2, 0.2, 1.0), // Svak generell belysning i scenen
+    diffuse: vec4.fromValues(1.0, 1.0, 1.0, 1.0), // Diffust lys som sprer seg jevnt
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0) // Sterkt speilreflekterende lys
+};
+
+const sunMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: sunTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
 
-const earthMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/earth_daymap.jpg')
+const earthMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: earthTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
 
-const moonMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/moon.jpg')
+const moonMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.3, 0.3, 0.3, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: moonTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
 
-const mercuryMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/mercury_daymap.jpg')
+const mercuryMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: mercuryTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
 
-const marsMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/mars.jpg')
+const marsMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: marsTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
 
-const jupiterMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/jupiter.jpg')
+const jupiterMaterial = new PhongMaterial({
+    color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
+    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
+    shininess: 32.0,
+    map: jupiterTexture,
+    lightAmbient: light.ambient,
+    lightDiffuse: light.diffuse,
+    lightSpecular: light.specular
 });
-
-// Get more textures here:
-// https://www.solarsystemscope.com/textures/
-
-// Get relative sizes here:
-// http://www.exploratorium.edu/ronh/solar_system/
-// You dont have to use these, as the planets may be too tiny to be visible.
 
 // A Primitive consists of geometry and a material.
 // We create a sphere Primitive using the static method 'createSphere'.
 // The generated geometry is called a UV-sphere and it has 32 vertical and horizontal subdivisions (latitude and longitude).
 // Additionally, we specify that we want the Primitive to be drawn with sunMaterial.
 const sunPrimitive = Primitive.createSphere(sunMaterial, 32, 32);
-
 // A Primitive is only drawn as part of a Mesh,
 // so we instantiate a new Mesh with the sunPrimitive.
 // (A Mesh can consist of multiple Primitives. )
 const sun = new Mesh([sunPrimitive]);
 
+const mercuryPrimitive = Primitive.from(sunPrimitive, mercuryMaterial);
+const earthPrimitive = Primitive.from(sunPrimitive, earthMaterial);
+const moonPrimitive = Primitive.from(sunPrimitive, moonMaterial);
+const marsPrimitive = Primitive.from(sunPrimitive, marsMaterial);
+const jupiterPrimitive = Primitive.from(sunPrimitive, jupiterMaterial);
+
 // Finally, we add the sun to our scene.
 // Only meshes that have been added to our scene, either as a child or as a descendant, will be drawn.
 scene.add(sun);
 
-// We also want to draw the earth, so we use the static method 'from' to create a new Primitive based on the previous one.
-// Using this function ensures that we're reusing the same buffers for geometry, while allowing us to specify a different material.
-const mercuryPrimitive = Primitive.from(sunPrimitive,mercuryMaterial);
-
-const earthPrimitive = Primitive.from(sunPrimitive, earthMaterial);
-const moonPrimitive = Primitive.from(sunPrimitive,moonMaterial)
-
-const marsPrimitive = Primitive.from(sunPrimitive,marsMaterial);
-const jupiterPrimitive = Primitive.from(sunPrimitive,jupiterMaterial)
 // Next we create a Node that represents the Earths orbit.
 // This node is not translated at all, because we want it to be centered inside the sun.
 // It is however rotated in the update-loop at starting at line 215.
@@ -83,8 +130,8 @@ const jupiterOrbitNode = new Node(scene)
 const mercuryCenterNode = new Node(mercuryOrbitNode);
 
 const earthCenterNode = new Node(earthOrbitNode);
-    const moonOrbitNode = new Node(earthCenterNode);
-    const moonCenterNode = new Node(moonOrbitNode);
+const moonOrbitNode = new Node(earthCenterNode);
+const moonCenterNode = new Node(moonOrbitNode);
 
 const marsCenterNode = new Node(marsOrbitNode);
 const jupiterCenterNode = new Node(jupiterOrbitNode);
@@ -238,7 +285,7 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
-// We create a vec3 to hold the players velocity (this way we avoid allocating a new one every frame).
+// We create a vec4 to hold the players velocity (this way we avoid allocating a new one every frame).
 const velocity = vec3.fromValues(0.0, 0.0, 0.0);
 
 const TICK_RATE = 1000 / 60; // 60 fps is the reference Hz.
@@ -278,7 +325,7 @@ function loop(now) {
 
     // Camera rotation is represented as a quaternion.
     // We rotate the velocity vector based the cameras rotation in order to translate along the direction we're looking.
-    const translation = vec3.transformQuat(vec3.create(), velocity, camera.rotation);
+    const translation = vec3.transformQuat(vec4.create(), velocity, camera.rotation);
     player.applyTranslation(...translation);
 
     // Animate bodies:
