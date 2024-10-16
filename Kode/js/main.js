@@ -1,6 +1,7 @@
 import MouseLookController from './MouseLookController.js';
-import {Renderer, Scene, Node, Mesh, Primitive, PerspectiveCamera, vec4, vec3} from '../lib/engine/index.js';
-import PhongMaterial from './PhongMaterial.js';
+import {Renderer, Scene, Node, Mesh, Primitive, PerspectiveCamera, vec4, vec3, CubeMapMaterial, Light} from '../lib/engine/index.js';
+import PhongMaterial from '../lib/engine/src/materials/PhongMaterial.js';
+import {BasicMaterial} from "../lib/engine";
 
 // Create a Renderer and append the canvas element to the DOM.
 let renderer = new Renderer(window.innerWidth, window.innerHeight);
@@ -19,17 +20,19 @@ const mercuryTexture = renderer.loadTexture('resources/mercury_daymap.jpg');
 const marsTexture = renderer.loadTexture('resources/mars.jpg');
 const jupiterTexture = renderer.loadTexture('resources/jupiter.jpg');
 
-const lightNode = new Node();
-lightNode.setTranslation(0, 0, 0); // Plassér lyset ved solens posisjon
-scene.add(lightNode);
 
-const light = {
+
+const light = new Light(
+{
     ambient: vec4.fromValues(0.2, 0.2, 0.2, 1.0), // Svak generell belysning i scenen
     diffuse: vec4.fromValues(1.0, 1.0, 1.0, 1.0), // Diffust lys som sprer seg jevnt
-    specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0) // Sterkt speilreflekterende lys
-};
+    specular:vec4.fromValues(1.0, 1.0, 1.0, 1.0) // Sterkt speilreflekterende lys
+});
 
-const sunMaterial = new PhongMaterial({
+scene.add(light);
+
+
+const sunMaterial = new BasicMaterial({
     color: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
     ambient: vec4.fromValues(0.5, 0.5, 0.5, 1.0),
     specular: vec4.fromValues(1.0, 1.0, 1.0, 1.0),
@@ -285,7 +288,7 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
-// We create a vec4 to hold the players velocity (this way we avoid allocating a new one every frame).
+// We create a vec to hold the players velocity (this way we avoid allocating a new one every frame).
 const velocity = vec3.fromValues(0.0, 0.0, 0.0);
 
 const TICK_RATE = 1000 / 60; // 60 fps is the reference Hz.
@@ -325,7 +328,7 @@ function loop(now) {
 
     // Camera rotation is represented as a quaternion.
     // We rotate the velocity vector based the cameras rotation in order to translate along the direction we're looking.
-    const translation = vec3.transformQuat(vec4.create(), velocity, camera.rotation);
+    const translation = vec3.transformQuat(vec3.create(), velocity, camera.rotation);
     player.applyTranslation(...translation);
 
     // Animate bodies:

@@ -1,4 +1,4 @@
-import { vec4, Material } from '../../lib/engine/index.js';
+import { vec4, Material } from '../../index.js';
 import PhongShader from './PhongShader.js';
 
 export default class PhongMaterial extends Material {
